@@ -1,0 +1,78 @@
+05. 그래프 탐색 (Graph Search, DFS & BFS) - 응용편 1 37분
+문제 2251 물통 
+#pragma warning(disable:4996)
+#include <iostream>
+#include <algorithm>
+#include <string>
+typedef long long int ll;
+using namespace std;
+
+#define NM 205
+
+struct State {
+	int X[3];
+	State() {}//<-질문1.이부분은 무슨의미인가요? 위에있는 X[3]는 변수 int x 배열을 3개를 선언하겠다는거까지는 이해했어요. 
+	State(int x, int y, int z) {
+		X[0] = x, X[1] = y, X[2] = z;
+	}
+	State(int _X[])//<-질문2.[]이부분이 배열을 받는 다는 표시인가요? 
+	{
+		for (int i = 0; i < 3; i++) X[i] = _X[i];
+	}
+	State move(int from, int to, int Limit[]) {
+		State res(X);
+		if (X[from] + X[to] <= Limit[to]) {  // 만약 from 을 전부 부을 수 있다면
+			res.X[to] = res.X[from] + res.X[to];
+			res.X[from] = 0;
+		}
+		else {  // from 의 일부만 옮길 수 있는 경우
+			res.X[from] -= Limit[to] - res.X[to];
+			res.X[to] = Limit[to];
+		}
+		return res;
+	}
+};
+
+int Limit[3];
+void input() {
+	cin >> Limit[0] >> Limit[1] >> Limit[2];
+}
+
+#include <queue>
+queue<State> Q;
+bool possible[NM];
+bool visit[NM][NM][NM];
+
+bool isVisited(State s) { return visit[s.X[0]][s.X[1]][s.X[2]]; }
+void checkVisit(State s) { visit[s.X[0]][s.X[1]][s.X[2]] = true; }//질문3.여기서 s는 (State(0, 0, Limit[2]))중에서0, 0, Limit[2] 이부분을 의미하나요?
+void pro() {
+	Q.push(State(0, 0, Limit[2]));
+	checkVisit(State(0, 0, Limit[2]));
+	while (!Q.empty()) {
+		State cur = Q.front();
+		Q.pop();
+		if (cur.X[0] == 0) possible[cur.X[2]] = true;//질문4. possible배열안에 숫자가 어느부분을 의미하는건가요?
+		//정답이 1 2 8 9 10인데 1첫번째, 두번째 등이 가능하다는 의미인데 1번째가 물통 b c가 어느 정도 찬지는 어떻게 알아요?
+		// 첫번째나 두번째가 가능하다는 부분이 정확히 어떻게 나오는지 잘모르곘어요.
+		//질문5. 아래사진처럼 cur와 cur.x가 메모리 주소도 같고 값이 같은데 .X는 왜있는건가요?
+		for (int from = 0; from < 3; from++) {
+			for (int to = 0; to < 3; to++) {//질문6 범위가 3인 이유가 물통이 3개라서 그런건가요?
+				if (from == to) continue;
+				State nxt = cur.move(from, to, Limit);
+				if (isVisited(nxt)) continue;
+				checkVisit(nxt);
+				Q.push(nxt);
+			}
+		}
+	}
+	for (int i = 0; i <= 200; i++) if (possible[i]) cout << i << " ";
+}
+
+
+int main() {
+	ios::sync_with_stdio(false); cin.tie(0); cout.tie(0);
+	freopen("input2.txt", "r", stdin);
+	input();
+	pro();
+	return 0;
+}
