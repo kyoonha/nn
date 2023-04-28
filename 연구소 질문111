@@ -1,0 +1,155 @@
+#pragma warning(disable:4996)
+#include <iostream>
+#include <algorithm>
+#include <string>
+typedef long long int ll;
+using namespace std;
+
+#define NM 11
+
+int N, M, B, A[NM][NM], blank[NM * NM][2], ans;//질문1. 범위가 왜 [NM][2]가 아닌가요?
+bool visit[NM][NM];
+int dir[4][2] = { {1,0},{0,1},{-1,0},{0,-1} };
+
+void input() {
+	cin >> N >> M;
+	for (int i = 1; i <= N; i++)
+		for (int j = 1; j <= M; j++)
+			cin >> A[i][j];
+}
+
+#include <queue>
+void bfs() {
+	queue<int> Q;
+
+	// 모든 바이러스가 시작점으로 가능하니까, 전부 큐에 넣어준다.
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= M; j++) {
+			visit[i][j] = false;
+			if (A[i][j] == 2) {//2:바이러스
+				Q.push(i);
+				Q.push(j);
+				visit[i][j] = true;
+			}
+		}
+	}
+
+	// BFS 과정
+	while (!Q.empty()) {
+		int x = Q.front(); Q.pop();
+		int y = Q.front(); Q.pop();
+		for (int k = 0; k < 4; k++) {
+			int nx = x + dir[k][0], ny = y + dir[k][1];
+			if (nx < 1 || ny < 1 || nx > N || ny > M) continue;
+			if (A[nx][ny] != 0) continue;
+			if (visit[nx][ny]) continue;
+			visit[nx][ny] = true;
+			Q.push(nx);
+			Q.push(ny);
+		}
+	}
+
+	// 탐색이 종료된 시점이니, 안전 영역의 넓이를 계산하고, 정답을 갱신한다.
+	int cnt = 0;
+	for (int i = 1; i <= N; i++) for (int j = 1; j <= M; j++) if (A[i][j] == 0 && !visit[i][j]) cnt++;
+	ans = max(ans, cnt);
+}
+
+void dfs(int idx, int selected_cnt) {
+	if (selected_cnt == 3) {
+		bfs();
+		return;
+	}
+
+	if (idx > B) return;//벽의 개수보다 클때 조회 끝난거니 리턴할것
+
+	A[blank[idx][0]][blank[idx][1]] = 1;
+	dfs(idx + 1, selected_cnt + 1);
+	//질문2. 위 코드 로직이 dfs(2,1)->dfs(3,2)->dfs(4,3)일때 아래 cout(벽증가)가 실행되는데 
+	//dfs(2,1),dfs(3,2)때는 실행되지 않고 dfs(4,3)일때부텨 실행되는건가요?
+//출력예시
+===========벽 증가============
+idx:4,selected_cnt:3
+2111110
+0010120
+0110100
+0100000
+0000011
+0100000
+0100000
+===========벽 증가============
+idx:5,selected_cnt:3
+2110111
+0010120
+0110100
+0100000
+0000011
+0100000
+0100000
+===========벽 증가============
+idx:6,selected_cnt:3
+2110110
+1010120
+0110100
+0100000
+0000011
+0100000
+0100000
+	cout << "===========벽 증가============" << endl;
+	cout  <<"idx:" << idx+1 << "," << "selected_cnt:" << selected_cnt+1 << endl;
+	for (int i = 1; i < N+1; i++) {
+		for (int j = 1; j < M+1; j++) {
+			cout << A[i][j] ;
+		}
+		cout << endl;
+	}
+	//cout << A[blank[idx][0]][blank[idx][1]] << " " << idx << selected_cnt<<endl;
+	//for (int i = 0; i < N; i++) {
+	//	for (int j = 0; j < M; j++) {
+	//		cout << A[blank[idx][0]][blank[idx][1]];
+	//	}
+	//	cout << endl;
+	//}
+	A[blank[idx][0]][blank[idx][1]] = 0;
+	dfs(idx + 1, selected_cnt);
+	cout << "===========벽 감소============" << endl;
+	cout << "idx:" << idx+1 << "," << "selected_cnt:" << selected_cnt << endl;
+	for (int i = 1; i < N+1; i++) {
+		for (int j = 1; j < M+1; j++) {
+			cout << A[i][j];
+		}
+		cout << endl;
+	}
+	//cout << "===========벽 감소===========" << endl;
+	//cout << A[blank[idx][0]][blank[idx][1]] << " " << idx << selected_cnt << endl;
+}
+
+void pro() {
+	for (int i = 1; i < N+1; i++)
+		for (int j = 1; j < M+1;j++)
+			if (A[i][j] == 0) {
+				B++;
+				blank[B][0] = i;
+				blank[B][1] = j;
+				//cout << B <<":" << blank[B][0] << "," << blank[B][1] << endl;
+			}
+
+	dfs(1, 0);
+	cout << ans;
+}
+
+
+int main() {
+	ios::sync_with_stdio(false); cin.tie(0); cout.tie(0);
+	freopen("input2.txt", "r", stdin);
+	input();
+	pro();
+	return 0;
+}
+ 
+ 
+//질문3. 
+
+//dfs(idx + 1, selected_cnt + 1);아래코드인 cout 벽증가만 계속 나오고 dfs(idx + 1, selected_cnt);밑에 cout 이부분은 나중에 연달아 나오는데요. 
+//제가 이 코드는 벽 3개일 때까지 벽 증가 되었다가 3개일 떄 바로 벽 감소 dfs(idx + 1, selected_cnt);이게 호출될꺼라 생각했는데요. 디버깅해놓은 상태를 보면 벽감소 만 연달아 나와서 제가 생각했던 부분이 아닌 것 같아서요. 저는 (dfs(idx + 1, selected_cnt + 1);))-> dfs(idx + 1, selected_cnt + 1);-> dfs(idx + 1, selected_cnt + 1);-> 나오고 dfs(idx + 1, selected_cnt);이건지 알았습니다.
+// 이거 함수 로직이 어떻게 되는건가요?
