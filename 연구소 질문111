@@ -153,3 +153,5 @@ int main() {
 //dfs(idx + 1, selected_cnt + 1);아래코드인 cout 벽증가만 계속 나오고 dfs(idx + 1, selected_cnt);밑에 cout 이부분은 나중에 연달아 나오는데요. 
 //제가 이 코드는 벽 3개일 때까지 벽 증가 되었다가 3개일 떄 바로 벽 감소 dfs(idx + 1, selected_cnt);이게 호출될꺼라 생각했는데요. 디버깅해놓은 상태를 보면 벽감소 만 연달아 나와서 제가 생각했던 부분이 아닌 것 같아서요. 저는 (dfs(idx + 1, selected_cnt + 1);))-> dfs(idx + 1, selected_cnt + 1);-> dfs(idx + 1, selected_cnt + 1);-> 나오고 dfs(idx + 1, selected_cnt);이건지 알았습니다.
 // 이거 함수 로직이 어떻게 되는건가요?
+//아래는 위 코드 디버깅한 자료입니다.
+//https://github.com/kyoonha/nn/blob/main/%EC%97%B0%EA%B5%AC%EC%86%8C%20%EB%94%94%EB%B2%84%EA%B9%85%20%ED%8C%8C%EC%9D%BC
